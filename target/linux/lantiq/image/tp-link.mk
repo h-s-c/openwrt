@@ -19,12 +19,20 @@ define Device/tplink_tdw8970
   DEVICE_VARIANT := v1
   TPLINK_FLASHLAYOUT := 8Mltq
   TPLINK_HWID := 0x89700001
-  TPLINK_HWREV := 1
+  TPLINK_HWREV := 0xc
   IMAGE_SIZE := 7680k
   DEVICE_PACKAGES:= kmod-ath9k wpad-basic kmod-usb-dwc2 kmod-usb-ledtrig-usbport
   SUPPORTED_DEVICES += TDW8970
 endef
 TARGET_DEVICES += tplink_tdw8970
+
+define Device/tplink_tdw8970b
+  $(Device/tplink_tdw8970)
+  DEVICE_MODEL := TD-W8970B
+  TPLINK_HWREV := 0xd
+  SUPPORTED_DEVICES += TDW8970B
+endef
+TARGET_DEVICES += tplink_tdw8970b
 
 define Device/tplink_tdw8980
   $(Device/lantiqTpLink)
@@ -32,12 +40,38 @@ define Device/tplink_tdw8980
   DEVICE_VARIANT := v1
   TPLINK_FLASHLAYOUT := 8Mltq
   TPLINK_HWID := 0x89800001
-  TPLINK_HWREV := 14
+  TPLINK_HWREV := 0xe
   IMAGE_SIZE := 7680k
   DEVICE_PACKAGES:= kmod-ath9k kmod-owl-loader wpad-basic kmod-usb-dwc2 kmod-usb-ledtrig-usbport
   SUPPORTED_DEVICES += TDW8980
 endef
 TARGET_DEVICES += tplink_tdw8980
+
+define Device/tplink_tdw8980b
+  $(Device/tplink_tdw8980)
+  DEVICE_MODEL := TD-W8980B
+  TPLINK_HWREV := 0xf
+  SUPPORTED_DEVICES += TDW8980B
+endef
+TARGET_DEVICES += tplink_tdw8980b
+
+define Device/tplink_tdw9980
+  $(Device/tplink_tdw8980)
+  DEVICE_MODEL := TD-W9980
+  TPLINK_HWID := 0x99800001
+  TPLINK_HWREV := 0x21
+  SUPPORTED_DEVICES += TDW9980
+endef
+TARGET_DEVICES += tplink_tdw9980
+
+define Device/tplink_tdw9980b
+  $(Device/tplink_tdw8980)
+  DEVICE_MODEL := TD-W9980B
+  TPLINK_HWID := 0x99800001
+  TPLINK_HWREV := 0x22
+  SUPPORTED_DEVICES += TDW9980B
+endef
+TARGET_DEVICES += tplink_tdw9980b
 
 define Device/tplink_vr200
   $(Device/lantiqTpLink)
