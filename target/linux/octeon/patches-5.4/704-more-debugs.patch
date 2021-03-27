@@ -1,0 +1,48 @@
+--- a/arch/mips/cavium-octeon/executive/cvmx-helper.c
++++ b/arch/mips/cavium-octeon/executive/cvmx-helper.c
+@@ -971,6 +971,7 @@ int cvmx_helper_ipd_and_packet_input_enable(void)
+ 	int interface;
+ 
+ 	/* Enable IPD */
++    cvmx_dprintf("COULD IT BE cvmx_ipd_enable???\n");
+ 	cvmx_ipd_enable();
+ 
+ 	/*
+@@ -978,13 +979,16 @@ int cvmx_helper_ipd_and_packet_input_enable(void)
+ 	 * that at this point IPD/PIP must be fully functional and PKO
+ 	 * must be disabled
+ 	 */
++    cvmx_dprintf("COULD IT BE getting no of interfaces????\n");
+ 	num_interfaces = cvmx_helper_get_number_of_interfaces();
+ 	for (interface = 0; interface < num_interfaces; interface++) {
++      cvmx_dprintf("COULD IT BE interface # %d ??ces????\n", interface);
+ 		if (cvmx_helper_ports_on_interface(interface) > 0)
+ 			__cvmx_helper_packet_hardware_enable(interface);
+ 	}
+ 
+ 	/* Finally enable PKO now that the entire path is up and running */
++    cvmx_dprintf("COULD IT BE PKO???\n");
+ 	cvmx_pko_enable();
+ 
+ 	if ((OCTEON_IS_MODEL(OCTEON_CN31XX_PASS1)
+--- a/arch/mips/include/asm/octeon/cvmx-ipd.h
++++ b/arch/mips/include/asm/octeon/cvmx-ipd.h
+@@ -129,15 +129,18 @@ static inline void cvmx_ipd_config(uint64_t mbuff_size,
+ static inline void cvmx_ipd_enable(void)
+ {
+ 	union cvmx_ipd_ctl_status ipd_reg;
++	cvmx_dprintf("COULD IT BE THIS ONE CSR READ IN cvmx_ipd_enable ??\n");
+ 	ipd_reg.u64 = cvmx_read_csr(CVMX_IPD_CTL_STATUS);
+ 	if (ipd_reg.s.ipd_en) {
+ 		cvmx_dprintf
+ 		    ("Warning: Enabling IPD when IPD already enabled.\n");
+ 	}
++    cvmx_dprintf("OK IT PASSED THE READ. BUT THERE'S THIS CVMX_ENABLE_LEN_M8_FIX THAT COULD APPLY??\n");
+ 	ipd_reg.s.ipd_en = 1;
+ #if  CVMX_ENABLE_LEN_M8_FIX
+ 	if (!OCTEON_IS_MODEL(OCTEON_CN38XX_PASS2))
+ 		ipd_reg.s.len_m8 = TRUE;
+ #endif
++    cvmx_dprintf("COULD IT BE THIS ONE CSR WRITE??? IN cvmx_ipd_enable ??\n");
+ 	cvmx_write_csr(CVMX_IPD_CTL_STATUS, ipd_reg.u64);
+ }

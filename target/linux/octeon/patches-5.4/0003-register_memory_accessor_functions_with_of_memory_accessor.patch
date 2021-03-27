@@ -1,0 +1,42 @@
+From: Abhishek Paliwal <abhishek.paliwal@aricent.com>
+Date: Fri, 13 Feb 2015 12:48:16 +0530
+Subject: misc/at24: Register memory accessor functions with of_memory_accessor
+
+From: Aaron Williams <aaron.williams@cavium.com>
+
+The at24 module will now register its memory accessor functions with its
+device tree entry so that other modules may call these functions based on
+the device tree node.
+
+Signed-off-by: Aaron Williams <aaron.williams@cavium.com>
+Signed-off-by: Leonid Rosenboim <lrosenboim@caviumnetworks.com>
+Signed-off-by: Abhishek Paliwal <abhishek.paliwal@aricent.com>
+--- a/drivers/misc/eeprom/at24.c
++++ b/drivers/misc/eeprom/at24.c
+@@ -23,6 +23,7 @@
+ #include <linux/regmap.h>
+ #include <linux/pm_runtime.h>
+ #include <linux/gpio/consumer.h>
++#include <linux/of_memory_accessor.h>
+ 
+ /* Address pointer is 16 bit. */
+ #define AT24_FLAG_ADDR16	BIT(7)
+@@ -720,6 +721,9 @@ static int at24_probe(struct i2c_client *client, const struct i2c_device_id *id)
+ 		 byte_len, client->name,
+ 		 writable ? "writable" : "read-only", at24->write_max);
+ 
++	if (client->dev.of_node)
++		of_memory_accessor_register(&client->dev, &at24->macc);
++
+ 	return 0;
+ }
+ 
+@@ -728,5 +732,8 @@ static int at24_remove(struct i2c_client *client)
+ 	pm_runtime_disable(&client->dev);
+ 	pm_runtime_set_suspended(&client->dev);
+ 
++	if (client->dev.of_node)
++		of_memory_accessor_remove(&client->dev);
++
+ 	return 0;
+ }

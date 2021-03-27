@@ -1,0 +1,79 @@
+--- a/arch/mips/cavium-octeon/executive/cvmx-helper.c
++++ b/arch/mips/cavium-octeon/executive/cvmx-helper.c
+@@ -1041,12 +1041,14 @@ int cvmx_helper_initialize_packet_io_global(void)
+ 		result |= __cvmx_helper_interface_setup_ipd(interface);
+ 		result |= __cvmx_helper_interface_setup_pko(interface);
+ 	}
+-
++	cvmx_dprintf("Gets past end of interfaces setup\n");
+ 	result |= __cvmx_helper_global_setup_ipd();
+ 	result |= __cvmx_helper_global_setup_pko();
+ 
++	cvmx_dprintf("Sets up global helpers\n");
+ 	/* Enable any flow control and backpressure */
+ 	result |= __cvmx_helper_global_setup_backpressure();
++	cvmx_dprintf("Sets up backpressure helpers\n");
+ 
+ #if CVMX_HELPER_ENABLE_IPD
+ 	result |= cvmx_helper_ipd_and_packet_input_enable();
+--- a/drivers/staging/octeon/ethernet.c
++++ b/drivers/staging/octeon/ethernet.c
+@@ -700,6 +700,7 @@ static int cvm_oct_probe(struct platform_device *pdev)
+ 	cvm_oct_configure_common_hw();
+ 
+ 	cvmx_helper_initialize_packet_io_global();
++	pr_err("OK, we got out of packet_io_global()\n");
+ 
+ 	if (receive_group_order) {
+ 		if (receive_group_order > 4)
+@@ -709,9 +710,11 @@ static int cvm_oct_probe(struct platform_device *pdev)
+ 		pow_receive_groups = BIT(pow_receive_group);
+ 	}
+ 
++	pr_err("We got through receive_group_order\n");
+ 	/* Change the input group for all ports before input is enabled */
+ 	num_interfaces = cvmx_helper_get_number_of_interfaces();
+ 	for (interface = 0; interface < num_interfaces; interface++) {
++		pr_err("We are starting on interface %d\n", interface);
+ 		int num_ports = cvmx_helper_ports_on_interface(interface);
+ 		int port;
+ 
+@@ -752,14 +755,14 @@ static int cvm_oct_probe(struct platform_device *pdev)
+ 				pip_prt_tagx.s.grptag	= 0;
+ 				pip_prt_tagx.s.grp	= pow_receive_group;
+ 			}
+-
++			pr_err("COULD IT BE CSR WRITES???\n");
+ 			cvmx_write_csr(CVMX_PIP_PRT_TAGX(port),
+ 				       pip_prt_tagx.u64);
+ 		}
+ 	}
+-
++	pr_err("COULD it be cvmx_helper_ipd_and_packet_input_enable???\n");
+ 	cvmx_helper_ipd_and_packet_input_enable();
+-
++	pr_err("COULD it be this memset??\n");
+ 	memset(cvm_oct_device, 0, sizeof(cvm_oct_device));
+ 
+ 	/*
+@@ -804,6 +807,7 @@ static int cvm_oct_probe(struct platform_device *pdev)
+ 		}
+ 	}
+ 
++	pr_err("OK, we got THIS far, all the way to the interface init. Which is weird, we shoulda crashed by now\n");
+ 	num_interfaces = cvmx_helper_get_number_of_interfaces();
+ 	for (interface = 0; interface < num_interfaces; interface++) {
+ 		cvmx_helper_interface_mode_t imode =
+@@ -860,8 +864,10 @@ static int cvm_oct_probe(struct platform_device *pdev)
+ 				break;
+ 
+ 			case CVMX_HELPER_INTERFACE_MODE_XAUI:
+-				dev->netdev_ops = &cvm_oct_xaui_netdev_ops;
+-				strscpy(dev->name, "xaui%d", sizeof(dev->name));
++				if (of_device_is_available(priv->of_node)) {
++					dev->netdev_ops = &cvm_oct_xaui_netdev_ops;
++					strscpy(dev->name, "xaui%d", sizeof(dev->name));
++				}
+ 				break;
+ 
+ 			case CVMX_HELPER_INTERFACE_MODE_LOOP:
